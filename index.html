@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C-Verse: Zero to Advanced C Programming — Apple-Grade Interactive Systems Academy</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#050814',
+            midnight: '#090d1f',
+            surface: '#0d132a'
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Custom Apple-Grade Motion & Glassmorphism Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-obsidian text-slate-100 min-h-screen bg-cyber-grid relative selection:bg-emerald-500/30">
+
+  <!-- Full-Viewport Physics Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top Scroll Progress Indicator -->
+  <div class="fixed top-0 left-0 right-0 h-1 bg-white/5 z-50">
+    <div id="scroll-progress-bar" class="h-full w-0 bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-500 transition-all duration-150"></div>
+  </div>
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div id="ambient-orb-1" class="ambient-orb w-[520px] h-[520px] bg-emerald-500/20 -top-32 -left-24"></div>
+  <div id="ambient-orb-2" class="ambient-orb w-[560px] h-[560px] bg-cyan-500/15 top-1/3 -right-32"></div>
+  <div class="ambient-orb w-[480px] h-[480px] bg-purple-600/15 bottom-0 left-1/4"></div>
+
+  <!-- ========================================================================
+       STICKY FROSTED GLASS NAVIGATION HUD
+       ======================================================================== -->
+  <header class="sticky top-0 z-40 px-4 sm:px-6 lg:px-10 pt-3 pb-2">
+    <nav class="max-w-7xl mx-auto glass-panel-heavy rounded-2xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      <!-- Brand Identity -->
+      <a href="#top" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-cyan-500 to-purple-600 p-[1px] shadow-lg shadow-emerald-500/20">
+          <div class="w-full h-full bg-obsidian rounded-[11px] flex items-center justify-center font-mono-code font-extrabold text-lg text-emerald-400 group-hover:text-cyan-300 transition">
+            *C
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight text-white">C-VERSE</span>
+            <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-mono-code text-emerald-300 font-bold">
+              C17 KERNEL EDITION
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Zero to Advanced Systems Architecture</p>
+        </div>
+      </a>
+
+      <!-- Center Navigation Links -->
+      <div class="hidden xl:flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl border border-white/10 text-xs font-medium">
+        <a href="#scrollytelling-section" class="magnetic-btn px-3.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">Why Bare-Metal C</a>
+        <a href="#roadmap-section" class="magnetic-btn px-3.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/5">7-Module Map</a>
+        <a href="#curriculum-workspace" class="magnetic-btn px-3.5 py-1.5 rounded-lg text-emerald-300 hover:bg-emerald-500/10 font-semibold">Interactive Lessons</a>
+        <a href="#pointer-lab-section" class="magnetic-btn px-3.5 py-1.5 rounded-lg text-cyan-300 hover:bg-cyan-500/10 font-semibold">Pointer Visualizer</a>
+        <a href="#playground-section" class="magnetic-btn px-3.5 py-1.5 rounded-lg text-purple-300 hover:bg-purple-500/10 font-semibold">C17 Playground</a>
+        <a href="#gamification-section" class="magnetic-btn px-3.5 py-1.5 rounded-lg text-amber-300 hover:bg-amber-500/10">Badges &amp; Ranks</a>
+      </div>
+
+      <!-- Right Gamification HUD & ELI5 Master Switch -->
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <!-- ELI5 Mode Master Toggle -->
+        <button id="nav-eli5-toggle" onclick="window.cverseApp.toggleELI5Mode()"
+          class="magnetic-btn px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition">
+          <span>🧠 ELI5 Mode: OFF</span>
+        </button>
+
+        <!-- Daily Streak Pill -->
+        <div class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-mono-code" title="Daily Coding Streak">
+          <span class="text-sm">🔥</span>
+          <span id="nav-streak-count" class="font-bold text-amber-300">3d</span>
+        </div>
+
+        <!-- Rank & XP Progress Pill -->
+        <a href="#gamification-section" class="glass-pill px-3.5 py-1.5 rounded-xl flex items-center gap-2.5 hover:border-emerald-400/50 transition">
+          <span id="nav-rank-badge" class="text-base">🌱</span>
+          <div class="text-left">
+            <div class="flex items-center gap-2 text-[11px] font-mono-code">
+              <span id="nav-rank-title" class="font-bold text-white">Script Kiddie</span>
+              <span id="nav-xp-value" class="text-emerald-400">120 / 150 XP</span>
+            </div>
+            <div class="w-28 h-1.5 bg-slate-950 rounded-full overflow-hidden mt-0.5 border border-white/5">
+              <div id="nav-xp-bar" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500" style="width: 80%"></div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Sound FX Toggle -->
+        <button id="nav-sound-btn" onclick="window.cverseApp.toggleSoundFX()" title="Sound FX: ON"
+          class="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-sm transition">
+          🔊
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pt-6 pb-24 space-y-28">
+
+    <!-- ======================================================================
+         1. HERO SECTION: APPLE-INSPIRED PRODUCT LAUNCH EXPERIENCE
+         ====================================================================== -->
+    <section class="pt-4 lg:pt-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <!-- Left Column: Narrative & CTAs (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full glass-pill text-xs font-mono-code text-emerald-300 border border-emerald-500/30">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>ZERO TO KERNEL WIZARD • INTERACTIVE SYSTEMS ACADEMY</span>
+          </div>
+
+          <h1 class="text-4xl sm:text-6xl lg:text-[64px] font-black tracking-tight leading-[1.06] text-white">
+            Stop Fearing Pointers. <br />
+            <span class="text-gradient-cyber">Command Every Byte.</span>
+          </h1>
+
+          <p class="text-base sm:text-lg lg:text-xl text-slate-300 leading-relaxed max-w-2xl">
+            Welcome to <strong class="text-white">C-Verse</strong>—where rigorous bare-metal C programming meets tactile Apple-grade motion design, real-time hexadecimal RAM visualizers, and witty <span class="text-purple-300 font-semibold">Explain Like I'm 5 (ELI5)</span> analogies.
+          </p>
+
+          <!-- Primary CTA Buttons -->
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <a href="#curriculum-workspace" class="magnetic-btn px-7 py-4 rounded-2xl btn-emerald-glow text-slate-950 font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-2.5">
+              <span>⚡ Enter Interactive Curriculum</span>
+              <span class="font-mono-code text-xs px-2 py-0.5 rounded bg-slate-950/20">MOD 01–07</span>
+            </a>
+            <a href="#pointer-lab-section" class="magnetic-btn px-6 py-4 rounded-2xl glass-panel hover:border-cyan-400/50 text-cyan-300 font-mono-code text-xs sm:text-sm font-bold flex items-center gap-2">
+              <span>🎯 Launch Pointer Visualizer</span>
+            </a>
+            <a href="#playground-section" class="magnetic-btn px-5 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 font-mono-code text-xs sm:text-sm font-semibold">
+              💻 Open C17 IDE
+            </a>
+          </div>
+
+          <!-- Telemetry Metrics Bar -->
+          <div class="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="glass-panel rounded-2xl p-3.5 border border-white/10">
+              <div class="text-xs font-mono-code text-slate-400">Curriculum</div>
+              <div class="text-xl font-extrabold text-white mt-0.5">7 Modules</div>
+              <div class="text-[11px] text-emerald-400 font-mono-code">Syntax ➔ File I/O</div>
+            </div>
+            <div class="glass-panel rounded-2xl p-3.5 border border-white/10">
+              <div class="text-xs font-mono-code text-slate-400">Your Mastery</div>
+              <div id="stat-modules-completed" class="text-xl font-extrabold text-cyan-300 mt-0.5">0/7</div>
+              <div class="text-[11px] text-slate-400 font-mono-code">LocalStorage Synced</div>
+            </div>
+            <div class="glass-panel rounded-2xl p-3.5 border border-white/10">
+              <div class="text-xs font-mono-code text-slate-400">Digital Badges</div>
+              <div id="stat-badges-unlocked" class="text-xl font-extrabold text-purple-300 mt-0.5">1/12</div>
+              <div class="text-[11px] text-purple-400 font-mono-code">Physics Rewards</div>
+            </div>
+            <div class="glass-panel rounded-2xl p-3.5 border border-white/10">
+              <div class="text-xs font-mono-code text-slate-400">Memory Engine</div>
+              <div class="text-xl font-extrabold text-emerald-400 mt-0.5">64-Bit Hex</div>
+              <div class="text-[11px] text-slate-400 font-mono-code">Stack &amp; Heap Live</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Animated Silicon & Live Pointer Telemetry Showcase (5 cols) -->
+        <div class="lg:col-span-5">
+          <div class="spotlight-card glass-panel-heavy rounded-3xl p-6 border border-cyan-500/30 animate-float-slow relative">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-400/80"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-400/80"></span>
+                <span class="ml-2 text-xs font-mono-code text-slate-400">kernel_memory_map.c</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[11px] font-mono-code text-emerald-300">
+                LIVE SILICON DIE
+              </span>
+            </div>
+
+            <!-- Mini Live Code Preview -->
+            <pre class="font-mono-code text-xs leading-relaxed text-slate-200 bg-slate-950/90 p-4 rounded-2xl border border-white/10 mb-4 overflow-x-auto"><code><span class="tok-type">int</span> core_power = <span class="tok-num">9000</span>;      <span class="tok-com">// @ 0x7fff5fbff8c0</span>
+<span class="tok-type">int</span> *master_key = &amp;core_power; <span class="tok-com">// Stores 0x7fff...8c0</span>
+*master_key += <span class="tok-num">999</span>;         <span class="tok-com">// Direct RAM mutation!</span></code></pre>
+
+            <!-- Animated SVG Pointer Curve Preview -->
+            <div class="rounded-2xl p-4 bg-slate-950/80 border border-cyan-500/20">
+              <div class="flex items-center justify-between text-[11px] font-mono-code text-slate-400 mb-2">
+                <span>POINTER REGISTER (8B)</span>
+                <span>TARGET STACK CELL (4B)</span>
+              </div>
+              <svg class="w-full h-24 overflow-visible" viewBox="0 0 400 90">
+                <defs>
+                  <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#10b981" />
+                    <stop offset="100%" stop-color="#06b6d4" />
+                  </linearGradient>
+                  <marker id="heroArrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 Z" fill="#06b6d4" />
+                  </marker>
+                </defs>
+                <!-- Left Box: master_key -->
+                <rect x="6" y="14" width="142" height="62" rx="12" fill="rgba(16,185,129,0.12)" stroke="#10b981" stroke-width="1.5" />
+                <text x="77" y="34" fill="#34d399" font-size="10" font-family="JetBrains Mono" text-anchor="middle" font-weight="bold">int *master_key</text>
+                <text x="77" y="54" fill="#ffffff" font-size="11" font-family="JetBrains Mono" text-anchor="middle">0x7fff...8c0</text>
+
+                <!-- Animated Bezier Arrow -->
+                <path id="heroMotionPath" d="M 150 45 C 195 10, 215 80, 250 45" fill="none" stroke="url(#heroGrad)" stroke-width="2.5" class="pointer-arrow-path" marker-end="url(#heroArrow)" />
+                <circle r="4.5" fill="#34d399">
+                  <animateMotion dur="1.2s" repeatCount="indefinite" path="M 150 45 C 195 10, 215 80, 250 45" />
+                </circle>
+
+                <!-- Right Box: core_power -->
+                <rect x="256" y="14" width="138" height="62" rx="12" fill="rgba(6,182,212,0.14)" stroke="#06b6d4" stroke-width="1.5" />
+                <text x="325" y="34" fill="#22d3ee" font-size="10" font-family="JetBrains Mono" text-anchor="middle" font-weight="bold">core_power</text>
+                <text x="325" y="56" fill="#ffffff" font-size="15" font-family="JetBrains Mono" text-anchor="middle" font-weight="bold">9999</text>
+                <text x="325" y="70" fill="#94a3b8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">@ 0x7fff5fbff8c0</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         2. SCROLL-DRIVEN STORYTELLING: WHY BARE-METAL C POWERS THE WORLD
+         ====================================================================== -->
+    <section id="scrollytelling-section" class="space-y-12">
+      <div class="text-center max-w-3xl mx-auto reveal-up">
+        <span class="px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono-code text-xs uppercase tracking-widest">
+          0x00 • Scroll-Driven Architecture Story
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight mt-4">
+          Beneath Every Modern Language <br />
+          <span class="text-gradient-apple">Lives a C Runtime.</span>
+        </h2>
+        <p class="text-slate-400 mt-3 text-base sm:text-lg">
+          Linux, macOS, Windows, Git, Redis, SQLite, Python's CPython interpreter, and Unreal Engine share one secret: direct, zero-abstraction control over silicon and RAM.
+        </p>
+      </div>
+
+      <!-- 3 Scrollytelling Hardware Comparison Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="spotlight-card glass-panel rounded-3xl p-7 border border-white/10 reveal-up stagger-1">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-2xl mb-5">
+            ⚡
+          </div>
+          <div class="text-xs font-mono-code text-emerald-400 mb-1">STAGE 01 • ZERO VM OVERHEAD</div>
+          <h3 class="text-xl font-bold text-white mb-2">Compiled Straight to Silicon</h3>
+          <p class="text-sm text-slate-300 leading-relaxed mb-4">
+            While interpreted languages translate instructions at runtime, <code class="text-emerald-300 font-mono-code">gcc -O2</code> compiles C directly into native x86_64 or ARM64 machine opcodes.
+          </p>
+          <div class="p-3 rounded-2xl bg-slate-950 border border-white/5 font-mono-code text-xs space-y-1.5">
+            <div class="flex justify-between text-emerald-400"><span>C17 Native Binary</span><span>1.0x (1.4ms)</span></div>
+            <div class="w-full h-1.5 bg-slate-900 rounded-full"><div class="w-1/12 h-full bg-emerald-400 rounded-full"></div></div>
+            <div class="flex justify-between text-slate-400 pt-1"><span>Interpreted VM</span><span>~45.0x (63ms)</span></div>
+            <div class="w-full h-1.5 bg-slate-900 rounded-full"><div class="w-11/12 h-full bg-rose-500/60 rounded-full"></div></div>
+          </div>
+        </div>
+
+        <div class="spotlight-card glass-panel rounded-3xl p-7 border border-white/10 reveal-up stagger-2">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-2xl mb-5">
+            🎯
+          </div>
+          <div class="text-xs font-mono-code text-cyan-400 mb-1">STAGE 02 • DETERMINISTIC RAM</div>
+          <h3 class="text-xl font-bold text-white mb-2">Exact Hexadecimal Addressing</h3>
+          <p class="text-sm text-slate-300 leading-relaxed mb-4">
+            Nothing is hidden behind opaque object wrappers. You see the exact address (<code class="text-cyan-300 font-mono-code">&amp;x</code>), byte alignment, and pointer path (<code class="text-cyan-300 font-mono-code">*ptr</code>) of every variable in RAM.
+          </p>
+          <div class="p-3 rounded-2xl bg-slate-950 border border-white/5 font-mono-code text-xs text-cyan-300">
+            0x7fff5fbff8a0 ➔ [ 0x00 | 0x00 | 0x00 | 0x2A ] (int 42)
+          </div>
+        </div>
+
+        <div class="spotlight-card glass-panel rounded-3xl p-7 border border-white/10 reveal-up stagger-3">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-2xl mb-5">
+            🧠
+          </div>
+          <div class="text-xs font-mono-code text-purple-400 mb-1">STAGE 03 • DUAL-MODE PEDAGOGY</div>
+          <h3 class="text-xl font-bold text-white mb-2">CS Rigor + ELI5 Analogies</h3>
+          <p class="text-sm text-slate-300 leading-relaxed mb-4">
+            Every dense systems concept in C-Verse features a 1-click <strong class="text-purple-300">ELI5 Analogy Toggle</strong>—turning intimidating memory jargon into intuitive visual stories.
+          </p>
+          <div class="p-3 rounded-2xl bg-purple-950/30 border border-purple-500/30 font-mono-code text-xs text-purple-200">
+            🧸 Toggle ELI5 anytime in the top bar or inside any module!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         3. COMPLETE 7-MODULE CURRICULUM ROADMAP OVERVIEW
+         ====================================================================== -->
+    <section id="roadmap-section" class="space-y-8 reveal-up">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono-code text-xs uppercase tracking-wider">
+            Complete Syllabus • Modules 1 to 7
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight mt-2">
+            The Zero-to-Advanced <span class="text-gradient-cyber">C-Verse Architecture Map</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.cverseApp.unlockAllDemo()" class="magnetic-btn px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-300 font-mono-code text-xs font-bold">
+            👑 Instructor Demo: Unlock All
+          </button>
+          <button onclick="window.cverseApp.resetProgress()" class="magnetic-btn px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 font-mono-code text-xs">
+            Reset Progress
+          </button>
+        </div>
+      </div>
+
+      <!-- Populated Dynamically by js/app.js -->
+      <div id="curriculum-roadmap-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+    <!-- ======================================================================
+         4. INTERACTIVE MODULE DEEP-DIVE WORKSPACE (MODULES 1 TO 7)
+         ====================================================================== -->
+    <section id="curriculum-workspace" class="scroll-mt-24 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+        <div>
+          <span class="text-xs font-mono-code uppercase tracking-widest text-emerald-400">Interactive Classroom &amp; Simulator</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Select a Module to Master</h2>
+        </div>
+        <!-- Module Switcher Pill Tabs -->
+        <div id="module-tabs-bar" class="flex flex-wrap items-center gap-2"></div>
+      </div>
+
+      <!-- Active Module Content Area (Concepts, ELI5, Interactive Lab, Project & Quiz) -->
+      <div id="active-module-container"></div>
+    </section>
+
+    <!-- ======================================================================
+         5. DEDICATED INTERACTIVE POINTER VISUALIZER LAB
+         ====================================================================== -->
+    <section id="pointer-lab-section" class="scroll-mt-24 space-y-6 reveal-up">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span class="px-3.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 font-mono-code text-xs font-bold">
+            🎯 SIGNATURE VISUAL TOOL • MODULE 5 &amp; BEYOND
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight mt-2">
+            The <span class="text-gradient-cyber">Pointer Visualizer</span> Sandbox
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base mt-1 max-w-2xl">
+            Watch memory addresses (<code class="text-cyan-300 font-mono-code">0x7fff5fbff8a0</code>), pointer arithmetic (<code class="text-emerald-300 font-mono-code">ptr++</code>), dereferencing (<code class="text-emerald-300 font-mono-code">*ptr = val</code>), and double pointers (<code class="text-purple-300 font-mono-code">**pptr</code>) animate in real time.
+          </p>
+        </div>
+      </div>
+
+      <div id="standalone-pointer-lab"></div>
+    </section>
+
+    <!-- ======================================================================
+         6. INTERACTIVE C17 CODE PLAYGROUND & LIVE MEMORY INSPECTOR
+         ====================================================================== -->
+    <section id="playground-section" class="scroll-mt-24 space-y-6 reveal-up">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span class="px-3.5 py-1 rounded-full bg-purple-500/15 border border-purple-400/40 text-purple-300 font-mono-code text-xs font-bold">
+            💻 INSTANT C17 COMPILER &amp; RAM DEBUGGER
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight mt-2">
+            Interactive <span class="text-gradient-cyber">C Code Playground</span>
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base mt-1">
+            Edit any Module's Hands-on Project or write custom C code. Inspect live Stack &amp; Heap memory allocations and compiler diagnostics on every run.
+          </p>
+        </div>
+
+        <!-- Preset Project Selector & Controls -->
+        <div class="flex flex-wrap items-center gap-3">
+          <label for="ide-preset-select" class="text-xs font-mono-code text-slate-400">Load Project:</label>
+          <select id="ide-preset-select" onchange="window.cverseApp.selectPlaygroundPreset(this.value)"
+            class="px-4 py-2.5 rounded-xl bg-slate-900 border border-white/15 text-white font-mono-code text-xs sm:text-sm focus:outline-none focus:border-emerald-400">
+          </select>
+          <button onclick="window.cverseApp.resetPlaygroundTemplate()"
+            class="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono-code text-slate-300">
+            ↺ Reset Template
+          </button>
+        </div>
+      </div>
+
+      <!-- IDE Split Workspace -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <!-- Left Pane: C Source Code Editor (7 cols) -->
+        <div class="lg:col-span-7 glass-panel-heavy rounded-3xl border border-white/15 flex flex-col overflow-hidden">
+          <!-- IDE Top Bar -->
+          <div class="px-5 py-3.5 bg-slate-950/90 border-b border-white/10 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-400/80"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-400/80"></span>
+              <span class="ml-2 font-mono-code text-xs text-slate-300 font-semibold">main.c — gcc -std=c17 -O2 -Wall</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span id="ide-diag-badge" class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono-code text-xs">
+                ✓ GCC C17 Diagnostics: 0 Errors
+              </span>
+              <button onclick="window.cverseApp.runPlaygroundCode(true)"
+                class="magnetic-btn px-4 py-1.5 rounded-xl btn-emerald-glow text-slate-950 font-mono-code text-xs font-extrabold flex items-center gap-1.5">
+                <span>▶ Compile &amp; Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Code Editor Surface with Synchronized Line Numbers & Highlight Overlay -->
+          <div class="flex flex-1 min-h-[410px] bg-[#040711] relative overflow-hidden">
+            <div id="ide-line-numbers" class="py-4 px-3 bg-slate-950/80 border-r border-white/5 text-right font-mono-code text-xs text-slate-500 select-none leading-[1.65]">
+              <div>1</div>
+            </div>
+            <div class="code-editor-container flex-1 overflow-auto">
+              <pre id="ide-code-highlight" class="code-editor-highlight text-slate-200"></pre>
+              <textarea id="ide-code-textarea" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+                class="code-editor-textarea" aria-label="C Source Code Editor"></textarea>
+            </div>
+          </div>
+
+          <!-- Editor Footer Bar (stdin input) -->
+          <div class="px-5 py-3 bg-slate-950/90 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 flex-1 min-w-[220px]">
+              <span class="text-xs font-mono-code text-slate-400 shrink-0">stdin buffer (scanf):</span>
+              <input id="ide-stdin-input" type="text" placeholder="Optional space-separated inputs..."
+                class="flex-1 px-3 py-1 rounded-lg bg-slate-900 border border-white/10 text-xs font-mono-code text-cyan-300 focus:outline-none focus:border-cyan-400" />
+            </div>
+            <span class="text-[11px] font-mono-code text-slate-500">Shortcut: Ctrl + Enter to Run</span>
+          </div>
+        </div>
+
+        <!-- Right Pane: Terminal Output + Live RAM Memory Watch Table (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+          <!-- Simulated Terminal Output -->
+          <div class="glass-panel-heavy rounded-3xl border border-white/15 flex-1 flex flex-col overflow-hidden">
+            <div class="px-5 py-3 bg-slate-950/90 border-b border-white/10 flex items-center justify-between text-xs font-mono-code">
+              <span class="text-emerald-400 font-bold">🖥 TERMINAL STDOUT / STDERR</span>
+              <div id="ide-exec-metrics" class="flex items-center gap-2 text-slate-400 text-[11px]"></div>
+            </div>
+            <div class="p-5 bg-[#03060f] flex-1 min-h-[190px] overflow-auto">
+              <pre id="ide-terminal-output" class="font-mono-code text-xs sm:text-sm text-emerald-300 whitespace-pre-wrap leading-relaxed"></pre>
+              <span class="terminal-cursor mt-1"></span>
+            </div>
+          </div>
+
+          <!-- Live Stack & Heap Variable Memory Watch Table -->
+          <div class="glass-panel-heavy rounded-3xl border border-cyan-500/25 overflow-hidden">
+            <div class="px-5 py-3 bg-slate-950/90 border-b border-white/10 flex items-center justify-between text-xs font-mono-code">
+              <span class="text-cyan-300 font-bold">🔬 LIVE RAM SYMBOL &amp; ADDRESS WATCH</span>
+              <span class="text-slate-400 text-[11px]">64-Bit Stack &amp; Heap</span>
+            </div>
+            <div class="overflow-x-auto max-h-56">
+              <table class="w-full text-left font-mono-code text-xs">
+                <thead class="bg-slate-950/60 text-slate-400 border-b border-white/10">
+                  <tr>
+                    <th class="py-2 px-3">Identifier</th>
+                    <th class="py-2 px-3">Type</th>
+                    <th class="py-2 px-3">Hex Address</th>
+                    <th class="py-2 px-3">Value</th>
+                  </tr>
+                </thead>
+                <tbody id="ide-memory-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         7. GAMIFICATION ARENA: RANK LADDER & DIGITAL BADGES VAULT
+         ====================================================================== -->
+    <section id="gamification-section" class="scroll-mt-24 space-y-8 reveal-up">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span class="px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 font-mono-code text-xs font-bold">
+            🏆 GAMIFIED PROGRESSION &amp; REWARDS
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight mt-2">
+            From <span class="text-slate-300">Script Kiddie</span> to <span class="text-gradient-gold">Kernel Wizard</span>
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base mt-1">
+            Complete lessons, crack the Secret Vault, free Heap allocations without leaks, and pass module quizzes to unlock all 12 digital badges.
+          </p>
+        </div>
+      </div>
+
+      <!-- 12 Digital Badges Grid -->
+      <div id="badges-gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="border-t border-white/10 bg-slate-950/80 py-10 px-4 sm:px-6 lg:px-10 relative z-10">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-mono-code">
+      <div class="flex items-center gap-3">
+        <span class="text-emerald-400 font-bold">C-VERSE // ZERO TO ADVANCED C</span>
+        <span>•</span>
+        <span>Built with Apple-Grade Motion, Interactive SVG RAM Visualizers &amp; C17 Simulation</span>
+      </div>
+      <div>
+        <span>return 0; // 0x00 Success</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Toast Notifications Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- Rank-Up / Achievement Modal -->
+  <div id="unlock-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-md p-4">
+    <div class="glass-panel-heavy rounded-3xl p-8 max-w-md w-full border border-emerald-400/50 text-center space-y-4 shadow-2xl">
+      <div id="unlock-modal-icon" class="w-20 h-20 mx-auto rounded-3xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-5xl">
+        👑
+      </div>
+      <div id="unlock-modal-xp" class="inline-block px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-mono-code text-xs font-bold">
+        +150 XP
+      </div>
+      <h3 id="unlock-modal-title" class="text-2xl font-black text-white">RANK UP!</h3>
+      <p id="unlock-modal-desc" class="text-sm text-slate-300 leading-relaxed"></p>
+      <button onclick="window.cverseApp.closeUnlockModal()" class="magnetic-btn w-full py-3 rounded-2xl btn-emerald-glow text-slate-950 font-mono-code font-extrabold text-sm">
+        Continue Mastering C →
+      </button>
+    </div>
+  </div>
+
+  <!-- Core Application Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/c-engine.js"></script>
+  <script src="js/visualizers.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
